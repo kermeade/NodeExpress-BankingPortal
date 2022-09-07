@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
+const { accounts, users, writeJSON } = require('./data');
 
 const app = express();
 
@@ -13,13 +14,6 @@ app.use(express.static(path.join(__dirname, '/public/')));
 
 // express middleware to handle POST data
 app.use(express.urlencoded({extended: true}));
-
-// read data synchronously from json file
-const accountData = fs.readFileSync('src/json/accounts.json', 'utf8');
-const accounts = JSON.parse(accountData);
-
-const userData = fs.readFileSync('src/json/users.json', 'utf8');
-const users = JSON.parse(userData);
 
 
 // handles get requests to /
@@ -74,11 +68,8 @@ app.post('/transfer', (req,res) => {
         accounts['checking'].balance = balance;
     }
     
-    // convert account data to JSON
-    const accountsJSON = JSON.stringify(accounts);
-    
-    // write account data to JSON file
-    fs.writeFileSync(path.join(__dirname,'json/accounts.json'), accountsJSON, 'utf8');
+    // convert account data to JSON and write to JSON file
+    writeJSON();
 
     res.render('transfer', {message: 'Transfer Completed'});
 });
@@ -98,11 +89,8 @@ app.post('/payment', (req,res) => {
     available += amount;
     accounts.credit.available = available;
     
-    // convert account data to JSON
-    const accountsJSON = JSON.stringify(accounts);
-    
-    // write account data to JSON file
-    fs.writeFileSync(path.join(__dirname,'json/accounts.json'), accountsJSON, 'utf8');
+    // convert account data to JSON and write to JSON file
+    writeJSON();
 
     res.render('payment', {
         message: 'Payment Successful',
